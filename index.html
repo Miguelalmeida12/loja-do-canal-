@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loja do Canal</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #0b0712;
+    color: white;
+}
+
+header {
+    background: #171022;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #33224d;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn {
+    background: #8b5cf6;
+    color: white;
+}
+
+.btn:hover {
+    opacity: .85;
+}
+
+.btn-red {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-green {
+    background: #22c55e;
+    color: white;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 25px;
+}
+
+.hero {
+    background: linear-gradient(135deg, #24113d, #10091a);
+    padding: 45px 25px;
+    text-align: center;
+    border-radius: 18px;
+    margin-bottom: 25px;
+}
+
+.hero h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.categories {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    margin-bottom: 25px;
+}
+
+.categories button {
+    background: #211532;
+    color: white;
+    white-space: nowrap;
+}
+
+.categories button.active {
+    background: #8b5cf6;
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+}
+
+.product {
+    background: #171022;
+    border: 1px solid #302041;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.product img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    background: #241b30;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product h3 {
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #b9afc8;
+    font-size: 14px;
+    min-height: 40px;
+}
+
+.price {
+    font-size: 21px;
+    font-weight: bold;
+    margin: 12px 0;
+}
+
+.stock {
+    font-size: 13px;
+    color: #a8a0b2;
+    margin-bottom: 10px;
+}
+
+.empty {
+    text-align: center;
+    padding: 40px;
+    color: #aaa;
+}
+
+/* CARRINHO */
+
+.cart {
+    position: fixed;
+    right: -420px;
+    top: 0;
+    width: 390px;
+    max-width: 95%;
+    height: 100vh;
+    background: #130c1c;
+    z-index: 30;
+    padding: 20px;
+    transition: .3s;
+    overflow-y: auto;
+    border-left: 1px solid #3a2850;
+}
+
+.cart.open {
+    right: 0;
+}
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.cart-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #30233d;
+}
+
+.cart-item img {
+    width: 65px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.quantity button {
+    padding: 4px 8px;
+    background: #332143;
+    color: white;
+}
+
+.total {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.coupon-area {
+    margin-top: 15px;
+}
+
+.coupon-area input {
+    width: 65%;
+}
+
+input, select, textarea {
+    background: #21172c;
+    border: 1px solid #46315a;
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+    margin: 5px 0 12px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.discount {
+    color: #4ade80;
+    margin: 8px 0;
+}
+
+/* MODAIS */
+
+.modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.modal-bg.show {
+    display: flex;
+}
+
+.modal {
+    background: #171022;
+    width: 700px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 18px;
+    padding: 25px;
+}
+
+.modal h2 {
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+.admin-product {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #21172c;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-product img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.admin-product-info {
+    flex: 1;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.admin-tabs button {
+    background: #281b36;
+    color: white;
+}
+
+.admin-tabs button.active {
+    background: #8b5cf6;
+}
+
+.tab {
+    display: none;
+}
+
+.tab.active {
+    display: block;
+}
+
+.coupon-item {
+    background: #21172c;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: #21172c;
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 25px;
+    margin-top: 5px;
+}
+
+@media(max-width:600px) {
+    .hero h1 {
+        font-size: 30px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full {
+        grid-column: auto;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .cart {
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🎮 LOJA DO CANAL</div>
+
+    <div>
+        <button class="btn" onclick="abrirCarrinho()">
+            🛒 Carrinho (<span id="cartCount">0</span>)
+        </button>
+
+        <button class="btn" onclick="abrirLogin()">
+            ⚙️ ADM
+        </button>
+    </div>
+</header>
+
+<div class="container">
+
+    <section class="hero">
+        <h1>LOJA DO CANAL</h1>
+        <p>Produtos oficiais, acessórios e muito mais!</p>
+    </section>
+
+    <div class="categories">
+        <button class="active" onclick="filtrar('todos', this)">Todos</button>
+        <button onclick="filtrar('camisas', this)">👕 Camisas</button>
+        <button onclick="filtrar('bonecos', this)">🧸 Bonecos</button>
+        <button onclick="filtrar('acessorios', this)">🎒 Acessórios</button>
+        <button onclick="filtrar('outros', this)">📦 Outros</button>
+    </div>
+
+    <section id="products" class="products"></section>
+
+</div>
+
+<!-- CARRINHO -->
+
+<div id="cart" class="cart">
+
+    <div class="cart-header">
+        <h2>🛒 Carrinho</h2>
+        <button onclick="fecharCarrinho()">✕</button>
+    </div>
+
+    <div id="cartItems"></div>
+
+    <div class="coupon-area">
+        <strong>🎟️ Cupom de desconto</strong>
+
+        <div style="display:flex; gap:5px; margin-top:8px;">
+            <input id="couponInput" placeholder="Digite seu cupom">
+            <button class="btn" onclick="aplicarCupom()">Aplicar</button>
+        </div>
+
+        <div id="couponMessage"></div>
+    </div>
+
+    <div id="cartTotal" class="total">
+        Total: R$ 0,00
+    </div>
+
+    <button class="btn-green" style="width:100%" onclick="finalizarPedido()">
+        Finalizar pedido
+    </button>
+
+</div>
+
+<!-- LOGIN ADM -->
+
+<div id="loginModal" class="modal-bg">
+
+    <div class="modal">
+
+        <h2>🔐 Acesso ADM</h2>
+
+        <input
+            id="adminPassword"
+            type="password"
+            placeholder="Senha do ADM"
+        >
+
+        <button class="btn" onclick="loginADM()">
+            Entrar
+        </button>
+
+        <button onclick="fecharModal('loginModal')">
+            Cancelar
+        </button>
+
+        <p id="loginError" style="color:#f87171;margin-top:10px;"></p>
+
+    </div>
+
+</div>
+
+<!-- ADM -->
+
+<div id="adminModal" class="modal-bg">
+
+    <div class="modal">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2>⚙️ Painel ADM</h2>
+
+            <button onclick="logoutADM()">Sair</button>
+        </div>
+
+        <div class="admin-tabs">
+
+            <button class="active" onclick="mostrarTab('produtos', this)">
+                📦 Produtos
+            </button>
+
+            <button onclick="mostrarTab('novoProduto', this)">
+                ➕ Novo produto
+            </button>
+
+            <button onclick="mostrarTab('cupons', this)">
+                🎟️ Cupons
+            </button>
+
+            <button onclick="mostrarTab('estatisticas', this)">
+                📊 Estatísticas
+            </button>
+
+        </div>
+
+        <!-- PRODUTOS -->
+
+        <div id="tab-produtos" class="tab active">
+
+            <h3>Produtos cadastrados</h3>
+
+            <div id="adminProducts"></div>
+
+        </div>
+
+        <!-- NOVO PRODUTO -->
+
+        <div id="tab-novoProduto" class="tab">
+
+            <h3 id="productFormTitle">Adicionar produto</h3>
+
+            <input type="hidden" id="editProductId">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Nome</label>
+                    <input id="productName" placeholder="Nome do produto">
+                </div>
+
+                <div>
+                    <label>Preço</label>
+                    <input id="productPrice" type="number" step="0.01" placeholder="49.90">
+                </div>
+
+                <div>
+                    <label>Estoque</label>
+                    <input id="productStock" type="number" min="0" placeholder="10">
+                </div>
+
+                <div>
+                    <label>Categoria</label>
+
+                    <select id="productCategory">
+                        <option value="camisas">Camisas</option>
+                        <option value="bonecos">Bonecos</option>
+                        <option value="acessorios">Acessórios</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+
+                <div class="full">
+                    <label>Descrição</label>
+                    <textarea
+                        id="productDescription"
+                        placeholder="Descrição do produto"
+                    ></textarea>
+                </div>
+
+                <div class="full">
+                    <label>URL da imagem</label>
+                    <input
+                        id="productImage"
+                        placeholder="https://..."
+                    >
+                </div>
+
+            </div>
+
+            <button class="btn-green" onclick="salvarProduto()">
+                💾 Salvar produto
+            </button>
+
+            <button onclick="limparFormulario()">
+                Limpar
+            </button>
+
+        </div>
+
+        <!-- CUPONS -->
+
+        <div id="tab-cupons" class="tab">
+
+            <h3>🎟️ Criar cupom</h3>
+
+            <input
+                id="couponCode"
+                placeholder="Ex: BEMVINDO10"
+            >
+
+            <select id="couponType">
+
+                <option value="percent">
+                    Desconto em %
+                </option>
+
+                <option value="fixed">
+                    Desconto em R$
+                </option>
+
+            </select>
+
+            <input
+                id="couponValue"
+                type="number"
+                step="0.01"
+                placeholder="10"
+            >
+
+            <input
+                id="couponMin"
+                type="number"
+                step="0.01"
+                placeholder="Compra mínima"
+            >
+
+            <button class="btn-green" onclick="salvarCupom()">
+                ➕ Criar cupom
+            </button>
+
+            <hr style="margin:20px 0;border-color:#38294a">
+
+            <h3>Cupons cadastrados</h3>
+
+            <div id="adminCoupons"></div>
+
+        </div>
+
+        <!-- ESTATÍSTICAS -->
+
+        <div id="tab-estatisticas" class="tab">
+
+            <div class="stats">
+
+                <div class="stat">
+                    Produtos
+                    <strong id="statProducts">0</strong>
+                </div>
+
+                <div class="stat">
+                    Estoque
+                    <strong id="statStock">0</strong>
+                </div>
+
+                <div class="stat">
+                    Cupons
+                    <strong id="statCoupons">0</strong>
+                </div>
+
+            </div>
+
+            <p>
+                Os dados desta versão ficam salvos apenas neste navegador.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* =========================
+   CONFIGURAÇÃO
+========================= */
+
+const SENHA_ADM = "1234";
+
+const DEFAULT_IMAGE =
+"https://via.placeholder.com/500x500/241b30/ffffff?text=Produto";
+
+
+/* =========================
+   PRODUTOS PADRÃO
+========================= */
+
+let produtos = JSON.parse(
+    localStorage.getItem("lojaProdutos")
+) || [
+
+    {
+        id: Date.now() + 1,
+        nome: "Camiseta Oficial",
+        preco: 59.90,
+        estoque: 10,
+        categoria: "camisas",
+        descricao: "Camiseta oficial da loja do canal.",
+        imagem: DEFAULT_IMAGE
+    },
+
+    {
+        id: Date.now() + 2,
+        nome: "Camiseta Especial",
+        preco: 69.90,
+        estoque: 8,
+        categoria: "camisas",
+        descricao: "Edição especial da loja.",
+        imagem: DEFAULT_IMAGE
+    },
+
+    {
+        id: Date.now() + 3,
+        nome: "Boneco do Canal",
+        preco: 79.90,
+        estoque: 5,
+        categoria: "bonecos",
+        descricao: "Boneco colecionável.",
+        imagem: DEFAULT_IMAGE
+    },
+
+    {
+        id: Date.now() + 4,
+        nome: "Pelúcia",
+        preco: 89.90,
+        estoque: 4,
+        categoria: "bonecos",
+        descricao: "Pelúcia temática do canal.",
+        imagem: DEFAULT_IMAGE
+    },
+
+    {
+        id: Date.now() + 5,
+        nome: "Boné",
+        preco: 39.90,
+        estoque: 12,
+        categoria: "acessorios",
+        descricao: "Boné oficial.",
+        imagem: DEFAULT_IMAGE
+    },
+
+    {
+        id: Date.now() + 6,
+        nome: "Chaveiro",
+        preco: 19.90,
+        estoque: 20,
+        categoria: "acessorios",
+        descricao: "Chaveiro exclusivo.",
+        imagem: DEFAULT_IMAGE
+    }
+
+];
+
+localStorage.setItem(
+    "lojaProdutos",
+    JSON.stringify(produtos)
+);
+
+
+/* =========================
+   CUPONS
+========================= */
+
+let cupons = JSON.parse(
+    localStorage.getItem("lojaCupons")
+) || [
+
+    {
+        codigo: "BEMVINDO10",
+        tipo: "percent",
+        valor: 10,
+        minimo: 0
+    }
+
+];
+
+localStorage.setItem(
+    "lojaCupons",
+    JSON.stringify(cupons)
+);
+
+
+/* =========================
+   CARRINHO
+========================= */
+
+let carrinho = JSON.parse(
+    localStorage.getItem("lojaCarrinho")
+) || [];
+
+let cupomAtual = null;
+
+
+/* =========================
+   FORMATAÇÃO
+========================= */
+
+function dinheiro(valor) {
+
+    return valor.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+}
+
+
+/* =========================
+   RENDER PRODUTOS
+========================= */
+
+function renderProdutos(categoria = "todos") {
+
+    const area = document.getElementById("products");
+
+    let lista = produtos;
+
+    if (categoria !== "todos") {
+
+        lista = produtos.filter(
+            p => p.categoria === categoria
+        );
+
+    }
+
+    if (lista.length === 0) {
+
+        area.innerHTML =
+            `<div class="empty">Nenhum produto encontrado.</div>`;
+
+        return;
+
+    }
+
+    area.innerHTML = lista.map(p => `
+
+        <div class="product">
+
+            <img
+                src="${p.imagem || DEFAULT_IMAGE}"
+                onerror="this.src='${DEFAULT_IMAGE}'"
+            >
+
+            <div class="product-info">
+
+                <h3>${p.nome}</h3>
+
+                <p class="description">
+                    ${p.descricao}
+                </p>
+
+                <div class="price">
+                    ${dinheiro(p.preco)}
+                </div>
+
+                <div class="stock">
+                    ${p.estoque > 0
+                        ? `📦 ${p.estoque} disponíveis`
+                        : `❌ Esgotado`}
+                </div>
+
+                <button
+                    class="btn"
+                    style="width:100%"
+                    onclick="adicionarCarrinho(${p.id})"
+                    ${p.estoque <= 0 ? "disabled" : ""}
+                >
+                    🛒 Adicionar
+                </button>
+
+            </div>
+
+        </div>
+
+    `).join("");
+
+}
+
+
+/* =========================
+   FILTRO
+========================= */
+
+function filtrar(categoria, botao) {
+
+    document
+        .querySelectorAll(".categories button")
+        .forEach(b => b.classList.remove("active"));
+
+    botao.classList.add("active");
+
+    renderProdutos(categoria);
+
+}
+
+
+/* =========================
+   CARRINHO
+========================= */
+
+function salvarCarrinho() {
+
+    localStorage.setItem(
+        "lojaCarrinho",
+        JSON.stringify(carrinho)
+    );
+
+}
+
+
+function adicionarCarrinho(id) {
+
+    const produto = produtos.find(
+        p => p.id === id
+    );
+
+    if (!produto || produto.estoque <= 0)
+        return;
+
+    const item = carrinho.find(
+        i => i.id === id
+    );
+
+    if (item) {
+
+        if (item.quantidade < produto.estoque)
+            item.quantidade++;
+
+    } else {
+
+        carrinho.push({
+            id: id,
+            quantidade: 1
+        });
+
+    }
+
+    salvarCarrinho();
+    renderCarrinho();
+
+}
+
+
+function alterarQuantidade(id, quantidade) {
+
+    const item = carrinho.find(
+        i => i.id === id
+    );
+
+    const produto = produtos.find(
+        p => p.id === id
+    );
+
+    if (!item || !produto)
+        return;
+
+    item.quantidade += quantidade;
+
+    if (item.quantidade <= 0) {
+
+        carrinho = carrinho.filter(
+            i => i.id !== id
+        );
+
+    }
+
+    if (item.quantidade > produto.estoque)
+        item.quantidade = produto.estoque;
+
+    salvarCarrinho();
+    renderCarrinho();
+
+}
+
+
+function removerCarrinho(id) {
+
+    carrinho = carrinho.filter(
+        i => i.id !== id
+    );
+
+    salvarCarrinho();
+    renderCarrinho();
+
+}
+
+
+function calcularSubtotal() {
+
+    return carrinho.reduce(
+        (total, item) => {
+
+            const produto = produtos.find(
+                p => p.id === item.id
+            );
+
+            return total +
+                (produto ? produto.preco * item.quantidade : 0);
+
+        },
+        0
+    );
+
+}
+
+
+function calcularDesconto(subtotal) {
+
+    if (!cupomAtual)
+        return 0;
+
+    if (subtotal < cupomAtual.minimo)
+        return 0;
+
+    if (cupomAtual.tipo === "percent") {
+
+        return subtotal * (cupomAtual.valor / 100);
+
+    }
+
+    return Math.min(
+        cupomAtual.valor,
+        subtotal
+    );
+
+}
+
+
+function renderCarrinho() {
+
+    const area =
+        document.getElementById("cartItems");
+
+    if (carrinho.length === 0) {
+
+        area.innerHTML =
+            `<div class="empty">Seu carrinho está vazio.</div>`;
+
+    } else {
+
+        area.innerHTML = carrinho.map(item => {
+
+            const produto = produtos.find(
+                p => p.id === item.id
+            );
+
+            if (!produto)
+                return "";
+
+            return `
+
+                <div class="cart-item">
+
+                    <img
+                        src="${produto.imagem || DEFAULT_IMAGE}"
+                    >
+
+                    <div class="cart-item-info">
+
+                        <strong>${produto.nome}</strong>
+
+                        <div>
+                            ${dinheiro(produto.preco)}
+                        </div>
+
+                        <div class="quantity">
+
+                            <button onclick="alterarQuantidade(${produto.id}, -1)">
+                                −
+                            </button>
+
+                            <span>${item.quantidade}</span>
+
+                            <button onclick="alterarQuantidade(${produto.id}, 1)">
+                                +
+                            </button>
+
+                            <button
+                                class="btn-red"
+                                onclick="removerCarrinho(${produto.id})"
+                            >
+                                🗑️
+   
