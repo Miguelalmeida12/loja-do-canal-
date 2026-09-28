@@ -1072,5 +1072,532 @@ function renderCarrinho() {
                                 class="btn-red"
                                 onclick="removerCarrinho(${produto.id})"
                             >
-                                🗑️
-   
+                                🗑️</button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+
+    }
+
+    const subtotal = calcularSubtotal();
+    const desconto = calcularDesconto(subtotal);
+    const total = Math.max(0, subtotal - desconto);
+
+    const count = carrinho.reduce(
+        (soma, item) => soma + item.quantidade,
+        0
+    );
+
+    document.getElementById("cartCount").textContent = count;
+
+    document.getElementById("cartTotal").innerHTML = `
+        Subtotal: ${dinheiro(subtotal)}
+        ${desconto > 0 ? `<div class="discount">Desconto: -${dinheiro(desconto)}</div>` : ""}
+        <div>Total: ${dinheiro(total)}</div>
+    `;
+}
+
+function abrirCarrinho() {
+    document.getElementById("cart").classList.add("open");
+    renderCarrinho();
+}
+
+function fecharCarrinho() {
+    document.getElementById("cart").classList.remove("open");
+}
+
+function abrirLogin() {
+    document.getElementById("loginModal").classList.add("show");
+    document.getElementById("adminPassword").value = "";
+    document.getElementById("loginError").textContent = "";
+}
+
+function fecharModal(id) {
+    document.getElementById(id).classList.remove("show");
+}
+
+function loginADM() {
+    const senha = document.getElementById("adminPassword").value;
+
+    if (senha === SENHA_ADM) {
+        fecharModal("loginModal");
+        document.getElementById("adminModal").classList.add("show");
+        renderAdmin();
+    } else {
+        document.getElementById("loginError").textContent =
+            "Senha incorreta.";
+    }
+}
+
+function logoutADM() {
+    fecharModal("adminModal");
+}
+
+function mostrarTab(tab, botao) {
+
+    document
+        .querySelectorAll(".admin-tabs button")
+        .forEach(b => b.classList.remove("active"));
+
+    botao.classList.add("active");
+
+    document
+        .querySelectorAll(".tab")
+        .forEach(t => t.classList.remove("active"));
+
+    document
+        .getElementById("tab-" + tab)
+        .classList.add("active");
+
+    if (tab === "produtos") renderAdminProdutos();
+    if (tab === "cupons") renderAdminCupons();
+    if (tab === "estatisticas") renderEstatisticas();
+}
+
+function renderAdmin() {
+    renderAdminProdutos();
+    renderAdminCupons();
+    renderEstatisticas();
+}
+
+function renderAdminProdutos() {
+
+    const area = document.getElementById("adminProducts");
+
+    if (!produtos.length) {
+        area.innerHTML =
+            '<div class="empty">Nenhum produto cadastrado.</div>';
+        return;
+    }
+
+    area.innerHTML = produtos.map(p => `
+        <div class="admin-product">
+
+            <img
+                src="${p.imagem || DEFAULT_IMAGE}"
+                onerror="this.src='${DEFAULT_IMAGE}'"
+            >
+
+            <div class="admin-product-info">
+
+                <strong>${p.nome}</strong><br>
+
+                ${dinheiro(p.preco)}
+                · Estoque: ${p.estoque}
+
+            </div>
+
+            <button
+                class="btn"
+                onclick="editarProduto(${p.id})"
+            >
+                Editar
+            </button>
+
+            <button
+                class="btn-red"
+                onclick="excluirProduto(${p.id})"
+            >
+                Excluir
+            </button>
+
+        </div>
+    `).join("");
+}
+
+function limparFormulario() {
+
+    document.getElementById("editProductId").value = "";
+
+    document.getElementById("productFormTitle").textContent =
+        "Adicionar produto";
+
+    document.getElementById("productName").value = "";
+    document.getElementById("productPrice").value = "";
+    document.getElementById("productStock").value = "";
+    document.getElementById("productCategory").value = "camisas";
+    document.getElementById("productDescription").value = "";
+    document.getElementById("productImage").value = "";
+}
+
+function editarProduto(id) {
+
+    const p = produtos.find(x => x.id === id);
+
+    if (!p) return;
+
+    document.getElementById("editProductId").value = p.id;
+
+    document.getElementById("productFormTitle").textContent =
+        "Editar produto";
+
+    document.getElementById("productName").value = p.nome;
+    document.getElementById("productPrice").value = p.preco;
+    document.getElementById("productStock").value = p.estoque;
+    document.getElementById("productCategory").value = p.categoria;
+    document.getElementById("productDescription").value = p.descricao || "";
+
+    document.getElementById("productImage").value =
+        p.imagem === DEFAULT_IMAGE ? "" : (p.imagem || "");
+
+    document
+        .querySelector(".admin-tabs button:nth-child(2)")
+        .click();
+}
+
+function salvarProduto() {
+
+    const id =
+        document.getElementById("editProductId").value;
+
+    const nome =
+        document.getElementById("productName").value.trim();
+
+    const preco =
+        parseFloat(
+            document.getElementById("productPrice").value
+        );
+
+    const estoque =
+        parseInt(
+            document.getElementById("productStock").value,
+            10
+        );
+
+    const categoria =
+        document.getElementById("productCategory").value;
+
+    const descricao =
+        document.getElementById("productDescription").value.trim();
+
+    const imagem =
+        document.getElementById("productImage").value.trim()
+        || DEFAULT_IMAGE;
+
+    if (!nome || isNaN(preco) || isNaN(estoque)) {
+
+        alert("Preencha nome, preço e estoque.");
+
+        return;
+    }
+
+    if (id) {
+
+        const p =
+            produtos.find(x => String(x.id) === String(id));
+
+        if (p) {
+
+            Object.assign(p, {
+                nome,
+                preco,
+                estoque,
+                categoria,
+                descricao,
+                imagem
+            });
+
+        }
+
+    } else {
+
+        produtos.push({
+
+            id: Date.now(),
+            nome,
+            preco,
+            estoque,
+            categoria,
+            descricao,
+            imagem
+
+        });
+
+    }
+
+    localStorage.setItem(
+        "lojaProdutos",
+        JSON.stringify(produtos)
+    );
+
+    renderProdutos();
+    renderAdmin();
+    limparFormulario();
+
+    alert("Produto salvo!");
+
+}
+
+function excluirProduto(id) {
+
+    if (!confirm("Excluir este produto?")) return;
+
+    produtos =
+        produtos.filter(p => p.id !== id);
+
+    localStorage.setItem(
+        "lojaProdutos",
+        JSON.stringify(produtos)
+    );
+
+    carrinho =
+        carrinho.filter(
+            i => produtos.some(p => p.id === i.id)
+        );
+
+    salvarCarrinho();
+
+    renderProdutos();
+    renderCarrinho();
+    renderAdmin();
+
+}
+
+function salvarCupom() {
+
+    const codigo =
+        document.getElementById("couponCode")
+        .value.trim()
+        .toUpperCase();
+
+    const tipo =
+        document.getElementById("couponType").value;
+
+    const valor =
+        parseFloat(
+            document.getElementById("couponValue").value
+        );
+
+    const minimo =
+        parseFloat(
+            document.getElementById("couponMin").value
+        ) || 0;
+
+    if (!codigo || isNaN(valor) || valor <= 0) {
+
+        alert("Preencha código e valor do cupom.");
+
+        return;
+    }
+
+    if (tipo === "percent" && valor > 100) {
+
+        alert("O desconto em % não pode passar de 100.");
+
+        return;
+    }
+
+    const existente =
+        cupons.find(c => c.codigo === codigo);
+
+    if (existente) {
+
+        Object.assign(existente, {
+            tipo,
+            valor,
+            minimo
+        });
+
+    } else {
+
+        cupons.push({
+            codigo,
+            tipo,
+            valor,
+            minimo
+        });
+
+    }
+
+    localStorage.setItem(
+        "lojaCupons",
+        JSON.stringify(cupons)
+    );
+
+    renderAdminCupons();
+
+    document.getElementById("couponCode").value = "";
+    document.getElementById("couponValue").value = "";
+    document.getElementById("couponMin").value = "";
+
+    alert("Cupom salvo!");
+
+}
+
+function renderAdminCupons() {
+
+    const area =
+        document.getElementById("adminCoupons");
+
+    if (!cupons.length) {
+
+        area.innerHTML =
+            '<div class="empty">Nenhum cupom cadastrado.</div>';
+
+        return;
+    }
+
+    area.innerHTML = cupons.map(c => `
+
+        <div class="coupon-item">
+
+            <strong>${c.codigo}</strong><br>
+
+            ${
+                c.tipo === "percent"
+                ? c.valor + "%"
+                : dinheiro(c.valor)
+            }
+
+            de desconto
+
+            ${
+                c.minimo > 0
+                ? " · Mínimo: " + dinheiro(c.minimo)
+                : ""
+            }
+
+            <button
+                class="btn-red"
+                style="float:right"
+                onclick="excluirCupom('${c.codigo}')"
+            >
+                Excluir
+            </button>
+
+        </div>
+
+    `).join("");
+
+}
+
+function excluirCupom(codigo) {
+
+    cupons =
+        cupons.filter(c => c.codigo !== codigo);
+
+    localStorage.setItem(
+        "lojaCupons",
+        JSON.stringify(cupons)
+    );
+
+    if (
+        cupomAtual &&
+        cupomAtual.codigo === codigo
+    ) {
+        cupomAtual = null;
+    }
+
+    renderAdminCupons();
+    renderCarrinho();
+
+}
+
+function aplicarCupom() {
+
+    const codigo =
+        document.getElementById("couponInput")
+        .value.trim()
+        .toUpperCase();
+
+    const msg =
+        document.getElementById("couponMessage");
+
+    const subtotal =
+        calcularSubtotal();
+
+    const cupom =
+        cupons.find(c => c.codigo === codigo);
+
+    if (!cupom) {
+
+        cupomAtual = null;
+
+        msg.innerHTML =
+            '<div style="color:#f87171">Cupom inválido.</div>';
+
+        renderCarrinho();
+
+        return;
+    }
+
+    if (subtotal < cupom.minimo) {
+
+        cupomAtual = null;
+
+        msg.innerHTML =
+            `<div style="color:#f87171">
+                Compra mínima: ${dinheiro(cupom.minimo)}.
+            </div>`;
+
+        renderCarrinho();
+
+        return;
+    }
+
+    cupomAtual = cupom;
+
+    msg.innerHTML =
+        '<div class="discount">Cupom aplicado!</div>';
+
+    renderCarrinho();
+
+}
+
+function finalizarPedido() {
+
+    if (!carrinho.length) {
+
+        alert("Seu carrinho está vazio.");
+
+        return;
+    }
+
+    const subtotal =
+        calcularSubtotal();
+
+    const desconto =
+        calcularDesconto(subtotal);
+
+    const total =
+        Math.max(0, subtotal - desconto);
+
+    alert(
+        `Pedido criado!\nTotal: ${dinheiro(total)}\n\nNesta versão, o pagamento não está integrado.`
+    );
+
+}
+
+function renderEstatisticas() {
+
+    document.getElementById("statProducts").textContent =
+        produtos.length;
+
+    document.getElementById("statStock").textContent =
+        produtos.reduce(
+            (total, p) =>
+                total + Number(p.estoque || 0),
+            0
+        );
+
+    document.getElementById("statCoupons").textContent =
+        cupons.length;
+
+}
+
+renderProdutos();
+renderCarrinho();
+renderAdmin();
+
+</script>
+
+</body>
+
+</html>   
